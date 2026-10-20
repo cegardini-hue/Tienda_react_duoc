@@ -13,7 +13,7 @@ import ContactoView from './views/ContactoView';
 
 // Importaciones desde la subcarpeta admin dentro de views
 import AdminLayout from './views/admin/AdminLayout';
-import AdminProductosView from './views/AdminProductosView';
+import AdminProductosView from './views/admin/AdminProductosView';
 
 function App() {
   return (

@@ -1,71 +1,86 @@
-/* Importación de tipografía moderna */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Roboto:wght@300;400;700&display=swap');
 
 :root {
-  --color-primario: #1e1e2f;
-  --color-secundario: #27293d;
-  --color-acento: #00d68f;
-  --color-texto: #ffffff;
-  --color-mutado: #9a9a9a;
+  --bg-principal: #000000;
+  --bg-card: #121212;
+  --azul-electrico: #1E90FF;
+  --verde-neon: #39FF14;
+  --texto-blanco: #FFFFFF;
+  --texto-secundario: #D3D3D3;
 }
 
 body {
   margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background-color: #1a1e34;
-  color: var(--color-texto);
+  background-color: var(--bg-principal) !important;
+  color: var(--texto-blanco) !important;
+  font-family: 'Roboto', sans-serif;
   min-height: 100vh;
 }
 
-/* Personalización de Navbar */
-.navbar {
-  background-color: var(--color-primario) !important;
-  border-bottom: 2px solid var(--color-acento);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+/* Tipografía de Títulos Futurista (Orbitron) */
+h1, h2, h3, h4, h5, .navbar-brand, .card-title {
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
 }
 
-/* Tarjetas de productos */
+/* Navbar */
+.navbar {
+  background-color: #0a0a0a !important;
+  border-bottom: 2px solid var(--verde-neon);
+  box-shadow: 0 4px 15px rgba(57, 255, 20, 0.2);
+}
+
+.navbar-brand {
+  color: var(--verde-neon) !important;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* Tarjetas de Producto */
 .card {
-  background-color: var(--color-secundario) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--bg-card) !important;
+  border: 1px solid rgba(30, 144, 255, 0.3) !important;
+  color: var(--texto-blanco) !important;
+  transition: all 0.3s ease;
 }
 
 .card:hover {
+  border-color: var(--verde-neon) !important;
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 214, 143, 0.2) !important;
 }
 
 .card-title {
-  color: #ffffff !important;
-  font-weight: 600;
+  color: var(--azul-electrico) !important;
 }
 
-.text-muted {
-  color: var(--color-mutado) !important;
+.text-muted, p, span {
+  color: var(--texto-secundario);
 }
 
-/* Botones personalizados */
+/* Botones con colores de acento */
 .btn-primary {
-  background-color: #5e72e4 !important;
-  border-color: #5e72e4 !important;
-}
-
-.btn-success {
-  background-color: var(--color-acento) !important;
-  border-color: var(--color-acento) !important;
-  color: #1e1e2f !important;
+  background-color: var(--azul-electrico) !important;
+  border-color: var(--azul-electrico) !important;
+  color: #000 !important;
   font-weight: bold;
 }
 
-/* Tablas en administración y carrito */
+.btn-success {
+  background-color: var(--verde-neon) !important;
+  border-color: var(--verde-neon) !important;
+  color: #000 !important;
+  font-weight: bold;
+}
+
+/* Tablas */
 .table {
-  color: #ffffff !important;
-  background-color: var(--color-secundario) !important;
+  color: var(--texto-blanco) !important;
+  background-color: var(--bg-card) !important;
 }
 
 .table th {
-  background-color: var(--color-primario) !important;
-  color: var(--color-acento) !important;
+  background-color: #1a1a1a !important;
+  color: var(--verde-neon) !important;
+  font-family: 'Orbitron', sans-serif;
 }

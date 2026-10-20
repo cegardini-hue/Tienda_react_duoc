@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
-import ProductCard from '../data/ProductCard';
+import ProductCard from '../components/ProductCard';
 
 function TiendaView() {
   const [productos, setProductos] = useState([]);

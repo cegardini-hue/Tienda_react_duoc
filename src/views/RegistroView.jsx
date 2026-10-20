@@ -1,129 +1,127 @@
 import { useState } from 'react';
-import { Alert, Button, Container, Form, Card } from 'react-bootstrap';
+import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 function RegistroView() {
-  const [formulario, setFormulario] = useState({
-    nombre: '',
-    email: '',
-    password: '',
-    confirmar: ''
-  });
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [exito, setExito] = useState('');
+  const navigate = useNavigate();
 
-  const [errores, setErrores] = useState({});
-  const [mensaje, setMensaje] = useState('');
-
-  function manejarCambio(event) {
-    const { name, value } = event.target;
-    setFormulario({
-      ...formulario,
-      [name]: value
-    });
+  function esMayorDeEdad(fecha) {
+    const hoy = new Date();
+    const nacimiento = new Date(fecha);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    return edad >= 18;
   }
 
-  function validar() {
-    const nuevosErrores = {};
-    if (formulario.nombre.trim().length < 3) {
-      nuevosErrores.nombre = 'Ingresa al menos 3 caracteres';
-    }
-    if (!formulario.email.includes('@')) {
-      nuevosErrores.email = 'Ingresa un correo válido';
-    }
-    if (formulario.password.length < 6) {
-      nuevosErrores.password = 'La contraseña debe tener al menos 6 caracteres';
-    }
-    if (formulario.password !== formulario.confirmar) {
-      nuevosErrores.confirmar = 'Las contraseñas no coinciden';
-    }
-    return nuevosErrores;
-  }
+  function handleRegistro(e) {
+    e.preventDefault();
+    setError('');
+    setExito('');
 
-  function registrar(event) {
-    event.preventDefault();
-    const nuevosErrores = validar();
-    setErrores(nuevosErrores);
-    setMensaje('');
-
-    if (Object.keys(nuevosErrores).length > 0) {
+    if (!nombre || !email || !fechaNacimiento || !password) {
+      setError('Todos los campos son obligatorios.');
       return;
     }
+
+    if (!esMayorDeEdad(fechaNacimiento)) {
+      setError('Debes ser mayor de 18 años para registrarte en Level-Up Gamer.');
+      return;
+    }
+
+    const esDuoc = email.toLowerCase().endsWith('@duoc.cl') || email.toLowerCase().endsWith('@duocuc.cl');
 
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    const existe = usuarios.some((usuario) => usuario.email === formulario.email);
-
-    if (existe) {
-      setErrores({ email: 'Este correo ya está registrado' });
+    if (usuarios.find(u => u.email === email)) {
+      setError('El correo ya se encuentra registrado.');
       return;
     }
 
-    usuarios.push({
-      id: Date.now(),
-      nombre: formulario.nombre,
-      email: formulario.email,
-      password: formulario.password,
-      rol: 'cliente'
-    });
+    const nuevoUsuario = {
+      nombre,
+      email,
+      fechaNacimiento,
+      password,
+      rol: 'cliente',
+      descuentoDuoc: esDuoc // 20% descuento
+    };
 
+    usuarios.push(nuevoUsuario);
     localStorage.setItem('usuarios', JSON.stringify(usuarios));
-    setMensaje('¡Usuario registrado correctamente!');
-    setFormulario({ nombre: '', email: '', password: '', confirmar: '' });
+
+    setExito(esDuoc 
+      ? '¡Registro exitoso! Se ha activado tu 20% de descuento de por vida por correo Duoc.' 
+      : '¡Registro exitoso! Ya puedes iniciar sesión.'
+    );
+
+    setTimeout(() => {
+      navigate('/login');
+    }, 2000);
   }
 
   return (
-    <Container className="py-4" style={{ maxWidth: '550px' }}>
-      <Card className="shadow-sm p-4">
-        <h2 className="mb-4 text-center">Crear Cuenta</h2>
-        {mensaje && <Alert variant="success">{mensaje}</Alert>}
-        
-        <Form onSubmit={registrar}>
+    <Container className="my-5" style={{ maxWidth: '500px' }}>
+      <Card className="p-4 shadow">
+        <h2 className="text-center mb-4" style={{ color: 'var(--verde-neon)' }}>LEVEL-UP GAMER</h2>
+        <h4 className="text-center mb-4">Registro de Usuario</h4>
+
+        {error && <Alert variant="danger">{error}</Alert>}
+        {exito && <Alert variant="success">{exito}</Alert>}
+
+        <Form onSubmit={handleRegistro}>
           <Form.Group className="mb-3">
             <Form.Label>Nombre Completo</Form.Label>
-            <Form.Control
-              name="nombre"
-              value={formulario.nombre}
-              onChange={manejarCambio}
-              isInvalid={!!errores.nombre}
+            <Form.InputElement 
+              type="text" 
+              placeholder="Ej: Juan Pérez" 
+              value={nombre} 
+              onChange={e => setNombre(e.target.value)} 
             />
-            <Form.Control.Feedback type="invalid">{errores.nombre}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-3">
             <Form.Label>Correo Electrónico</Form.Label>
-            <Form.Control
-              type="email"
-              name="email"
-              value={formulario.email}
-              onChange={manejarCambio}
-              isInvalid={!!errores.email}
+            <Form.Control 
+              type="email" 
+              placeholder="tu.correo@duoc.cl (20% dcto)" 
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
             />
-            <Form.Control.Feedback type="invalid">{errores.email}</Form.Control.Feedback>
+            <Form.Text className="text-muted">
+              Usa tu correo @duoc.cl para obtener un 20% de descuento vitalicio.
+            </Form.Text>
           </Form.Group>
 
           <Form.Group className="mb-3">
+            <Form.Label>Fecha de Nacimiento</Form.Label>
+            <Form.Control 
+              type="date" 
+              value={fechaNacimiento} 
+              onChange={e => setFechaNacimiento(e.target.value)} 
+            />
+            <Form.Text className="text-muted">Requisito: Debe ser mayor de 18 años.</Form.Text>
+          </Form.Group>
+
+          <Form.Group className="mb-4">
             <Form.Label>Contraseña</Form.Label>
-            <Form.Control
-              type="password"
-              name="password"
-              value={formulario.password}
-              onChange={manejarCambio}
-              isInvalid={!!errores.password}
+            <Form.Control 
+              type="password" 
+              placeholder="Contraseña" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
             />
-            <Form.Control.Feedback type="invalid">{errores.password}</Form.Control.Feedback>
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Confirmar Contraseña</Form.Label>
-            <Form.Control
-              type="password"
-              name="confirmar"
-              value={formulario.confirmar}
-              onChange={manejarCambio}
-              isInvalid={!!errores.confirmar}
-            />
-            <Form.Control.Feedback type="invalid">{errores.confirmar}</Form.Control.Feedback>
-          </Form.Group>
-
-          <Button type="submit" variant="primary" className="w-100 mt-2">
-            Registrarme
+          <Button variant="success" type="submit" className="w-100 py-2">
+            CREAR CUENTA
           </Button>
         </Form>
       </Card>

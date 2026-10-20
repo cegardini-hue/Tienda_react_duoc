@@ -1,8 +1,12 @@
 import { Routes, Route } from 'react-router-dom';
 import NavbarTienda from './components/NavbarTienda';
-import HomeView from './views/HomeView';
-import ProductoDetalleView from './views/ProductoDetalleView';
+import TiendaView from './views/TiendaView';
+import DetalleProductoView from './views/DetalleProductoView';
 import CarritoView from './views/CarritoView';
+import CategoriasView from './views/CategoriasView';
+import CheckoutView from './views/CheckoutView';
+import PagoExitosoView from './views/PagoExitosoView';
+import PagoErrorView from './views/PagoErrorView';
 import LoginView from './views/LoginView';
 import RegistroView from './views/RegistroView';
 import ContactoView from './views/ContactoView';
@@ -14,15 +18,19 @@ function App() {
     <>
       <NavbarTienda />
       <Routes>
-        {/* Rutas Públicas Principales */}
-        <Route path="/" element={<HomeView />} />
-        <Route path="/producto/:id" element={<ProductoDetalleView />} />
+        {/* Rutas Públicas */}
+        <Route path="/" element={<TiendaView />} />
+        <Route path="/producto/:id" element={<DetalleProductoView />} />
+        <Route path="/categorias" element={<CategoriasView />} />
         <Route path="/carrito" element={<CarritoView />} />
+        <Route path="/checkout" element={<CheckoutView />} />
+        <Route path="/pago-exitoso" element={<PagoExitosoView />} />
+        <Route path="/pago-error" element={<PagoErrorView />} />
         <Route path="/contacto" element={<ContactoView />} />
         <Route path="/login" element={<LoginView />} />
         <Route path="/registro" element={<RegistroView />} />
 
-        {/* Rutas Administrativas Protegidas */}
+        {/* Ruta Protegida de Administración */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="productos" element={<AdminProductosView />} />
         </Route>

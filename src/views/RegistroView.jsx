@@ -51,7 +51,7 @@ function RegistroView() {
       fechaNacimiento,
       password,
       rol: 'cliente',
-      descuentoDuoc: esDuoc // 20% descuento
+      descuentoDuoc: esDuoc
     };
 
     usuarios.push(nuevoUsuario);
@@ -79,7 +79,7 @@ function RegistroView() {
         <Form onSubmit={handleRegistro}>
           <Form.Group className="mb-3">
             <Form.Label>Nombre Completo</Form.Label>
-            <Form.InputElement 
+            <Form.Control 
               type="text" 
               placeholder="Ej: Juan Pérez" 
               value={nombre} 

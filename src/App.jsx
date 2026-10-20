@@ -14,6 +14,7 @@ import AdminLayout from './views/admin/AdminLayout';
 import AdminProductosView from './views/admin/AdminProductosView';
 import AdminAgregarProductoView from './views/admin/AdminAgregarProductoView';
 import { productosIniciales } from './data/productosIniciales';
+import ContactoView from './views/ContactoView';
 
 function App() {
   useEffect(() => {
@@ -41,6 +42,7 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="productos" element={<AdminProductosView />} />
             <Route path="productos/nuevo" element={<AdminAgregarProductoView />} />
+            <Route path="/contacto" element={<ContactoView />} />
           </Route>
         </Routes>
       </div>

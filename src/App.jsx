@@ -10,7 +10,9 @@ import PagoErrorView from './views/PagoErrorView';
 import LoginView from './views/LoginView';
 import RegistroView from './views/RegistroView';
 import ContactoView from './views/ContactoView';
-import AdminLayout from './components/AdminLayout';
+
+// Importaciones desde la subcarpeta admin dentro de views
+import AdminLayout from './views/admin/AdminLayout';
 import AdminProductosView from './views/AdminProductosView';
 
 function App() {

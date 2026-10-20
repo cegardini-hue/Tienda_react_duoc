@@ -3,6 +3,11 @@ import { Route, Routes } from 'react-router-dom';
 import NavbarTienda from './components/NavbarTienda';
 import TiendaView from './views/TiendaView';
 import DetalleProductoView from './views/DetalleProductoView';
+import CategoriasView from './views/CategoriasView';
+import CarritoView from './views/CarritoView';
+import CheckoutView from './views/CheckoutView';
+import PagoExitosoView from './views/PagoExitosoView';
+import PagoErrorView from './views/PagoErrorView';
 import LoginView from './views/LoginView';
 import RegistroView from './views/RegistroView';
 import AdminLayout from './views/admin/AdminLayout';
@@ -25,18 +30,18 @@ function App() {
         <Routes>
           <Route path="/" element={<TiendaView />} />
           <Route path="/producto/:id" element={<DetalleProductoView />} />
+          <Route path="/categorias" element={<CategoriasView />} />
+          <Route path="/carrito" element={<CarritoView />} />
+          <Route path="/checkout" element={<CheckoutView />} />
+          <Route path="/pago-exitoso" element={<PagoExitosoView />} />
+          <Route path="/pago-error" element={<PagoErrorView />} />
           <Route path="/login" element={<LoginView />} />
           <Route path="/registro" element={<RegistroView />} />
           
-          {/* Rutas anidadas de administración */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="productos" element={<AdminProductosView />} />
             <Route path="productos/nuevo" element={<AdminAgregarProductoView />} />
           </Route>
-
-          <Route path="/categorias" element={<h2>Vista Categorías</h2>} />
-          <Route path="/ofertas" element={<h2>Vista Ofertas</h2>} />
-          <Route path="/contacto" element={<h2>Vista Contacto</h2>} />
         </Routes>
       </div>
     </>

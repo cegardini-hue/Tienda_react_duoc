@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import ProductCard from './ProductCard';
+import ProductCard from '../data/ProductCard';
 
 describe('Pruebas Unitarias Componente ProductCard', () => {
   const productoPrueba = {

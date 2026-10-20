@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../data/ProductCard';
 
 function CategoriasView() {
   const [productos, setProductos] = useState([]);

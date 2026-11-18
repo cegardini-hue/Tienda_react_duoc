@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Alert, Container, Row, Col, Spinner } from 'react-bootstrap';
 import ProductCard from '../components/ProductCard';
-import { productosIniciales } from '../data/productosIniciales';
+import { getApiErrorMessage, getProducts } from '../api/productService';
 
 function TiendaView() {
   const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // 1. Intentar obtener productos de localStorage
-    const guardados = JSON.parse(localStorage.getItem('productos') || '[]');
-
-    // 2. Si no hay productos en localStorage, cargamos los productos por defecto y los guardamos
-    if (guardados.length === 0) {
-      localStorage.setItem('productos', JSON.stringify(productosIniciales));
-      setProductos(productosIniciales);
-    } else {
-      setProductos(guardados);
-    }
+    const controller = new AbortController();
+    getProducts(controller.signal)
+      .then(setProductos)
+      .catch((requestError) => {
+        if (!controller.signal.aborted) {
+          setError(getApiErrorMessage(requestError, 'No fue posible cargar los productos.'));
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCargando(false);
+      });
+    return () => controller.abort();
   }, []);
 
   return (
@@ -25,7 +29,10 @@ function TiendaView() {
         Catálogo de Productos
       </h1>
 
-      {productos.length === 0 ? (
+      {error && <Alert variant="danger">{error}</Alert>}
+      {cargando ? (
+        <p className="text-center" role="status"><Spinner size="sm" animation="border" className="me-2" />Cargando productos...</p>
+      ) : productos.length === 0 ? (
         <p className="text-center text-muted">No hay productos disponibles.</p>
       ) : (
         <Row className="g-4">

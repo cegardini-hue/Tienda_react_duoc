@@ -1,11 +1,13 @@
 import { Alert, Col, Container, Row } from 'react-bootstrap';
 import { Link, Outlet } from 'react-router-dom';
 import AdminSidebar from '../../components/AdminSidebar';
+import { hasAdminRole } from '../../api/authService';
+import { useAuth } from '../../auth/useAuth';
 
 function AdminLayout() {
-  const usuario = JSON.parse(sessionStorage.getItem('usuarioSesion') || 'null');
+  const { user: usuario } = useAuth();
 
-  if (!usuario || usuario.rol !== 'admin') {
+  if (!hasAdminRole(usuario)) {
     return (
       <Container className="py-4">
         <Alert variant="warning" className="text-center">

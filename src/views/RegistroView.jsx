@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Container, Form, Button, Card, Alert } from 'react-bootstrap';
+import { Container, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { register } from '../api/authService';
+import { getApiErrorMessage } from '../api/productService';
 
 function RegistroView() {
   const [nombre, setNombre] = useState('');
@@ -9,6 +11,7 @@ function RegistroView() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
+  const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
 
   function esMayorDeEdad(fecha) {
@@ -22,7 +25,7 @@ function RegistroView() {
     return edad >= 18;
   }
 
-  function handleRegistro(e) {
+  async function handleRegistro(e) {
     e.preventDefault();
     setError('');
     setExito('');
@@ -36,35 +39,23 @@ function RegistroView() {
       setError('Debes ser mayor de 18 años para registrarte en Level-Up Gamer.');
       return;
     }
-
-    const esDuoc = email.toLowerCase().endsWith('@duoc.cl') || email.toLowerCase().endsWith('@duocuc.cl');
-
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    if (usuarios.find(u => u.email === email)) {
-      setError('El correo ya se encuentra registrado.');
+    if (password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres.');
       return;
     }
 
-    const nuevoUsuario = {
-      nombre,
-      email,
-      fechaNacimiento,
-      password,
-      rol: 'cliente',
-      descuentoDuoc: esDuoc
-    };
-
-    usuarios.push(nuevoUsuario);
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
-
-    setExito(esDuoc 
-      ? '¡Registro exitoso! Se ha activado tu 20% de descuento de por vida por correo Duoc.' 
-      : '¡Registro exitoso! Ya puedes iniciar sesión.'
-    );
-
-    setTimeout(() => {
-      navigate('/login');
-    }, 2000);
+    setCargando(true);
+    try {
+      const usuario = await register({ nombre, email, fechaNacimiento, password });
+      setExito(usuario.descuentoDuoc
+        ? '¡Registro exitoso! Se ha activado tu 20% de descuento por correo Duoc.'
+        : '¡Registro exitoso! Ya puedes iniciar sesión.');
+      window.setTimeout(() => navigate('/login'), 1500);
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'No fue posible completar el registro.'));
+    } finally {
+      setCargando(false);
+    }
   }
 
   return (
@@ -116,12 +107,15 @@ function RegistroView() {
               type="password" 
               placeholder="Contraseña" 
               value={password} 
+              autoComplete="new-password"
               onChange={e => setPassword(e.target.value)} 
             />
+            <Form.Text className="text-muted">Debe tener al menos 8 caracteres.</Form.Text>
           </Form.Group>
 
-          <Button variant="success" type="submit" className="w-100 py-2">
-            CREAR CUENTA
+          <Button variant="success" type="submit" className="w-100 py-2" disabled={cargando}>
+            {cargando && <Spinner size="sm" animation="border" className="me-2" />}
+            {cargando ? 'CREANDO CUENTA...' : 'CREAR CUENTA'}
           </Button>
         </Form>
       </Card>

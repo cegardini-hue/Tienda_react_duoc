@@ -1,12 +1,14 @@
 import { Container, Nav, Navbar, Button } from 'react-bootstrap';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { hasAdminRole } from '../api/authService';
+import { useAuth } from '../auth/useAuth';
 
 function NavbarTienda() {
   const navigate = useNavigate();
-  const usuarioSesion = JSON.parse(sessionStorage.getItem('usuarioSesion') || 'null');
+  const { user: usuarioSesion, logout } = useAuth();
 
   function cerrarSesion() {
-    sessionStorage.removeItem('usuarioSesion');
+    logout();
     navigate('/login');
   }
 
@@ -33,7 +35,7 @@ function NavbarTienda() {
                 <span className="text-light me-3">
                   Hola, <strong>{usuarioSesion.nombre}</strong>
                 </span>
-                {usuarioSesion.rol === 'admin' && (
+                {hasAdminRole(usuarioSesion) && (
                   <Nav.Link as={NavLink} to="/admin/productos" className="text-warning me-2">
                     Panel Admin
                   </Nav.Link>

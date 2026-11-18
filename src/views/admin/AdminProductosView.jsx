@@ -1,26 +1,43 @@
 import { useEffect, useState } from 'react';
-import { Button, Table } from 'react-bootstrap';
+import { Alert, Button, Spinner, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { deleteProduct, getApiErrorMessage, getProducts } from '../../api/productService';
 
 function AdminProductosView() {
   const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [eliminandoId, setEliminandoId] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    cargarProductos();
+    const controller = new AbortController();
+    getProducts(controller.signal)
+      .then(setProductos)
+      .catch((requestError) => {
+        if (!controller.signal.aborted) {
+          setError(getApiErrorMessage(requestError, 'No fue posible cargar los productos.'));
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCargando(false);
+      });
+    return () => controller.abort();
   }, []);
 
-  function cargarProductos() {
-    const datos = JSON.parse(localStorage.getItem('productos') || '[]');
-    setProductos(datos);
-  }
-
-  function eliminarProducto(id) {
+  async function eliminarProducto(id) {
     const confirmar = window.confirm('¿Deseas eliminar este producto?');
     if (!confirmar) return;
 
-    const nuevosProductos = productos.filter((p) => p.id !== id);
-    localStorage.setItem('productos', JSON.stringify(nuevosProductos));
-    setProductos(nuevosProductos);
+    setEliminandoId(id);
+    setError('');
+    try {
+      await deleteProduct(id);
+      setProductos((actuales) => actuales.filter((producto) => producto.id !== id));
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError, 'No fue posible eliminar el producto.'));
+    } finally {
+      setEliminandoId(null);
+    }
   }
 
   return (
@@ -32,6 +49,12 @@ function AdminProductosView() {
         </Button>
       </div>
 
+      {error && <Alert variant="danger">{error}</Alert>}
+      {cargando ? (
+        <p role="status"><Spinner size="sm" animation="border" className="me-2" />Cargando productos...</p>
+      ) : productos.length === 0 ? (
+        <p className="text-muted">No hay productos disponibles.</p>
+      ) : (
       <Table responsive bordered hover align="middle">
         <thead className="table-dark">
           <tr>
@@ -57,20 +80,31 @@ function AdminProductosView() {
               </td>
               <td className="fw-bold">{prod.nombre}</td>
               <td>{prod.categoria}</td>
-              <td>${prod.precio.toLocaleString('es-CL')}</td>
+              <td>${Number(prod.precio).toLocaleString('es-CL')}</td>
               <td>
+                <Button
+                  as={Link}
+                  to={`/admin/productos/editar/${encodeURIComponent(prod.id)}`}
+                  variant="primary"
+                  size="sm"
+                  className="me-2"
+                >
+                  Editar
+                </Button>
                 <Button
                   variant="danger"
                   size="sm"
                   onClick={() => eliminarProducto(prod.id)}
+                  disabled={eliminandoId === prod.id}
                 >
-                  Eliminar
+                  {eliminandoId === prod.id ? 'Eliminando...' : 'Eliminar'}
                 </Button>
               </td>
             </tr>
           ))}
         </tbody>
       </Table>
+      )}
     </>
   );
 }

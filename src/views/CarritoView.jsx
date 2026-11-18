@@ -1,19 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Container, Table, Button, Card, Row, Col, Alert } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
 
 function CarritoView() {
-  const [carrito, setCarrito] = useState([]);
+  const [carrito, setCarrito] = useState(() => JSON.parse(localStorage.getItem('carrito') || '[]'));
   const navigate = useNavigate();
-
-  // Cargar sesión del usuario
-  const usuarioSesion = JSON.parse(sessionStorage.getItem('usuarioSesion') || 'null');
+  const { user: usuarioSesion } = useAuth();
   const tieneDescuentoDuoc = usuarioSesion?.descuentoDuoc || false;
-
-  useEffect(() => {
-    const carritoGuardado = JSON.parse(localStorage.getItem('carrito') || '[]');
-    setCarrito(carritoGuardado);
-  }, []);
 
   function actualizarStorage(nuevoCarrito) {
     setCarrito(nuevoCarrito);

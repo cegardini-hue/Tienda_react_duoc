@@ -11,6 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+!.env.tunel.local
+!.env.production.local
+backend/target/
+backend/data/
+tienda-web.tar.gz
 
 # Editor directories and files
 .vscode/*

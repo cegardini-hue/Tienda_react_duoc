@@ -14,6 +14,7 @@ import ContactoView from './views/ContactoView';
 // Importaciones desde la subcarpeta admin dentro de views
 import AdminLayout from './views/admin/AdminLayout';
 import AdminProductosView from './views/admin/AdminProductosView';
+import AdminAgregarProductoView from './views/admin/AdminAgregarProductoView';
 
 function App() {
   return (
@@ -35,6 +36,8 @@ function App() {
         {/* Ruta Protegida de Administración */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="productos" element={<AdminProductosView />} />
+          <Route path="productos/nuevo" element={<AdminAgregarProductoView />} />
+          <Route path="productos/editar/:id" element={<AdminAgregarProductoView />} />
         </Route>
       </Routes>
     </>

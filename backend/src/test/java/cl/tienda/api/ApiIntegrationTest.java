@@ -3,6 +3,7 @@ package cl.tienda.api;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,7 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         "spring.datasource.url=jdbc:h2:mem:tienda-test;DB_CLOSE_DELAY=-1",
         "app.jwt.secret=VGllbmRhUmVhY3QtZnJvbnRlbmQtdGVzdC1zZWNyZXQtMzItYnl0ZXM=",
         "app.admin.email=admin@test.local",
-        "app.admin.initial-password=test-admin-password-123"
+        "app.admin.initial-password=test-admin-password-123",
+        "app.seller.email=seller@test.local",
+        "app.seller.initial-password=test-seller-password-123"
 })
 class ApiIntegrationTest {
     @Autowired
@@ -40,6 +43,12 @@ class ApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(10)))
                 .andExpect(jsonPath("$[0].id").exists());
+        mockMvc.perform(get("/api/v1/categorias"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").exists());
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.info.version").value("v1"));
     }
 
     @Test
@@ -139,6 +148,68 @@ class ApiIntegrationTest {
                                   "precio": 1000,
                                   "categoria": "Pruebas",
                                   "descripcion": "Descripción del producto de prueba",
+                                  "imagen": "https://example.com/producto.png"
+                                }
+                                """))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void clientOrdersUseServerPricesAndVendorCanReadButNotModify() throws Exception {
+        String customerEmail = "cliente-" + UUID.randomUUID() + "@duoc.cl";
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RegisterPayload(
+                                "Cliente de prueba",
+                                customerEmail,
+                                LocalDate.now().minusYears(20).toString(),
+                                "password-segura-123"
+                        ))))
+                .andExpect(status().isCreated());
+
+        String customerToken = login(customerEmail, "password-segura-123");
+        MvcResult orderResult = mockMvc.perform(post("/api/v1/boletas")
+                        .header("Authorization", "Bearer " + customerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "nombreEntrega": "Cliente de prueba",
+                                  "correoEntrega": "entrega@duoc.cl",
+                                  "direccion": "Av. Siempre Viva 123",
+                                  "productos": [{"productoId": "JM001", "cantidad": 2}]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.subtotal").value(59980))
+                .andExpect(jsonPath("$.descuento").value(11996))
+                .andExpect(jsonPath("$.total").value(47984))
+                .andExpect(jsonPath("$.detalles", hasSize(1)))
+                .andReturn();
+
+        String orderId = objectMapper.readTree(orderResult.getResponse().getContentAsString())
+                .get("id").asText();
+        String sellerToken = login("seller@test.local", "test-seller-password-123");
+
+        mockMvc.perform(get("/api/v1/boletas")
+                        .header("Authorization", "Bearer " + sellerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(orderId));
+        mockMvc.perform(get("/api/v1/boletas")
+                        .header("Authorization", "Bearer " + customerToken))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/v1/boletas/{id}", orderId)
+                        .header("Authorization", "Bearer " + sellerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.detalles[0].nombreProducto").value("Catan"));
+        mockMvc.perform(put("/api/v1/productos/JM001")
+                        .header("Authorization", "Bearer " + sellerToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "nombre": "Producto modificado",
+                                  "precio": 1000,
+                                  "categoria": "Pruebas",
+                                  "descripcion": "Descripción válida",
                                   "imagen": "https://example.com/producto.png"
                                 }
                                 """))

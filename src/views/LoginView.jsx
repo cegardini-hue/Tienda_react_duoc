@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Alert, Button, Container, Form, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { hasAdminRole } from '../api/authService';
+import { hasAdminRole, hasSellerRole } from '../api/authService';
 import { getApiErrorMessage } from '../api/productService';
 import { useAuth } from '../auth/useAuth';
 
@@ -29,7 +29,7 @@ function LoginView() {
     setCargando(true);
     try {
       const usuario = await signIn({ email, password });
-      navigate(hasAdminRole(usuario) ? '/admin/productos' : '/');
+      navigate(hasAdminRole(usuario) ? '/admin/productos' : hasSellerRole(usuario) ? '/vendedor/productos' : '/');
     } catch (requestError) {
       setError(getApiErrorMessage(requestError, 'No fue posible iniciar sesión.'));
     } finally {

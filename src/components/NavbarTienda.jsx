@@ -1,6 +1,6 @@
 import { Container, Nav, Navbar, Button } from 'react-bootstrap';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { hasAdminRole } from '../api/authService';
+import { hasAdminRole, hasSellerRole } from '../api/authService';
 import { useAuth } from '../auth/useAuth';
 
 function NavbarTienda() {
@@ -38,6 +38,11 @@ function NavbarTienda() {
                 {hasAdminRole(usuarioSesion) && (
                   <Nav.Link as={NavLink} to="/admin/productos" className="text-warning me-2">
                     Panel Admin
+                  </Nav.Link>
+                )}
+                {hasSellerRole(usuarioSesion) && (
+                  <Nav.Link as={NavLink} to="/vendedor/productos" className="text-info me-2">
+                    Panel Vendedor
                   </Nav.Link>
                 )}
                 <Button variant="outline-danger" size="sm" onClick={cerrarSesion}>

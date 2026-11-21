@@ -1,0 +1,16 @@
+package cl.tienda.api.order;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import java.util.List;
+
+public record CreateOrderRequest(
+        @NotBlank @Size(max = 120) String nombreEntrega,
+        @NotBlank @Email @Size(max = 254) String correoEntrega,
+        @NotBlank @Size(max = 500) String direccion,
+        @NotEmpty @Size(max = 50) List<@Valid OrderLineRequest> productos
+) {
+}

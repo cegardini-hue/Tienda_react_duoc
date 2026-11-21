@@ -1,5 +1,6 @@
 server:
   port: ${PORT:8080}
+  address: ${SERVER_ADDRESS:127.0.0.1}
   forward-headers-strategy: framework
 
 spring:
@@ -30,3 +31,6 @@ app:
   admin:
     email: ${ADMIN_EMAIL:}
     initial-password: ${ADMIN_INITIAL_PASSWORD:}
+  seller:
+    email: ${SELLER_EMAIL:}
+    initial-password: ${SELLER_INITIAL_PASSWORD:}

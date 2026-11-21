@@ -3,6 +3,8 @@ package cl.tienda.api.product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 
@@ -21,6 +23,10 @@ public class ProductEntity {
 
     @Column(nullable = false, length = 80)
     private String categoria;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private CategoryEntity category;
 
     @Column(nullable = false, length = 2000)
     private String descripcion;
@@ -44,6 +50,10 @@ public class ProductEntity {
         this.imagen = imagen;
     }
 
+    public void setCategory(CategoryEntity category) {
+        this.category = category;
+    }
+
     public String getId() {
         return id;
     }
@@ -57,7 +67,11 @@ public class ProductEntity {
     }
 
     public String getCategoria() {
-        return categoria;
+        return category == null ? categoria : category.getNombre();
+    }
+
+    public CategoryEntity getCategory() {
+        return category;
     }
 
     public String getDescripcion() {

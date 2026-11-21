@@ -4,6 +4,8 @@ import cl.tienda.api.auth.EmailAlreadyRegisteredException;
 import cl.tienda.api.auth.InvalidBirthDateException;
 import cl.tienda.api.auth.InvalidPasswordException;
 import cl.tienda.api.product.ProductNotFoundException;
+import cl.tienda.api.order.BoletaNotFoundException;
+import cl.tienda.api.order.InvalidOrderException;
 import java.time.Instant;
 import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,6 +23,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<Map<String, Object>> productNotFound(ProductNotFoundException exception) {
         return error(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(BoletaNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> boletaNotFound(BoletaNotFoundException exception) {
+        return error(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidOrderException.class)
+    public ResponseEntity<Map<String, Object>> invalidOrder(InvalidOrderException exception) {
+        return error(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(EmailAlreadyRegisteredException.class)

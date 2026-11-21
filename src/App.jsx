@@ -15,6 +15,9 @@ import ContactoView from './views/ContactoView';
 import AdminLayout from './views/admin/AdminLayout';
 import AdminProductosView from './views/admin/AdminProductosView';
 import AdminAgregarProductoView from './views/admin/AdminAgregarProductoView';
+import OrderManagementView from './views/admin/OrderManagementView';
+import SellerLayout from './views/seller/SellerLayout';
+import SellerProductsView from './views/seller/SellerProductsView';
 
 function App() {
   return (
@@ -38,6 +41,11 @@ function App() {
           <Route path="productos" element={<AdminProductosView />} />
           <Route path="productos/nuevo" element={<AdminAgregarProductoView />} />
           <Route path="productos/editar/:id" element={<AdminAgregarProductoView />} />
+          <Route path="boletas" element={<OrderManagementView />} />
+        </Route>
+        <Route path="/vendedor" element={<SellerLayout />}>
+          <Route path="productos" element={<SellerProductsView />} />
+          <Route path="boletas" element={<OrderManagementView />} />
         </Route>
       </Routes>
     </>

@@ -12,6 +12,9 @@ function AdminSidebar() {
         <Nav.Link as={NavLink} to="/admin/productos/nuevo" className="text-white">
           ➕ Agregar Producto
         </Nav.Link>
+        <Nav.Link as={NavLink} to="/admin/boletas" className="text-white">
+          🧾 Boletas
+        </Nav.Link>
       </Nav>
     </div>
   );

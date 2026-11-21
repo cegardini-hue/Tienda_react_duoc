@@ -30,8 +30,13 @@ export function hasAdminRole(user) {
     .some((role) => role.replace(/^ROLE_/, '').toLowerCase() === 'admin');
 }
 
+export function hasSellerRole(user) {
+  return normalizeRoles(user?.rol, user?.role, user?.roles, user?.authorities)
+    .some((role) => role.replace(/^ROLE_/, '').toLowerCase() === 'vendedor');
+}
+
 export async function login(credentials) {
-  const { data } = await httpClient.post('/auth/login', credentials);
+  const { data } = await httpClient.post('/v1/auth/login', credentials);
   const { accessToken, tokenType = 'Bearer', expiresIn } = data;
 
   if (!accessToken || !Number.isFinite(Number(expiresIn)) || Number(expiresIn) <= 0) {
@@ -50,7 +55,9 @@ export async function login(credentials) {
     claims.roles,
     claims.authorities
   );
-  const adminRole = roles.find((role) => role.replace(/^ROLE_/, '').toLowerCase() === 'admin');
+  const activeRole = roles.find((role) =>
+    ['admin', 'vendedor', 'cliente'].includes(role.replace(/^ROLE_/, '').toLowerCase())
+  );
 
   return {
     accessToken,
@@ -59,13 +66,13 @@ export async function login(credentials) {
     user: {
       nombre: user.nombre || user.name || claims.nombre || claims.name || claims.sub || '',
       email: user.email || claims.email || '',
-      rol: adminRole || roles[0] || 'cliente',
+      rol: activeRole || roles[0] || 'cliente',
       descuentoDuoc: user.descuentoDuoc || false,
     },
   };
 }
 
 export async function register(credentials) {
-  const { data } = await httpClient.post('/auth/register', credentials);
+  const { data } = await httpClient.post('/v1/auth/register', credentials);
   return data;
 }

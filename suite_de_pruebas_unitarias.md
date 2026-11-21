@@ -1,79 +1,43 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import ProductCard from '../components/ProductCard';
-import RegistroView from '../views/RegistroView';
-import AdminLayout from '../views/admin/AdminLayout';
+# Plan y resultado de pruebas — Tienda React Duoc
 
-describe('Suite Completa de Pruebas Unitarias - Tienda React', () => {
+Las pruebas ejecutables del backend están en `backend/src/test/java/cl/tienda/api/ApiIntegrationTest.java`. Ejecuta desde la carpeta `backend`:
 
-  // --- PRUEBA 1: Renderizado de Componente y Props ---
-  test('1. ProductCard debe renderizar correctamente los datos del producto', () => {
-    const productoPrueba = {
-      id: 101,
-      nombre: 'Juego de Prueba Unitario',
-      precio: 25000,
-      categoria: 'Aventura',
-      descripcion: 'Descripción del juego de prueba',
-      imagen: 'https://picsum.photos/200'
-    };
+```powershell
+.\mvnw.cmd test
+```
 
-    render(
-      <BrowserRouter>
-        <ProductCard producto={productoPrueba} />
-      </BrowserRouter>
-    );
+## Cobertura automatizada backend
 
-    expect(screen.getByText('Juego de Prueba Unitario')).toBeInTheDocument();
-    expect(screen.getByText('Aventura')).toBeInTheDocument();
-    expect(screen.getByText('$25.000')).toBeInTheDocument();
-  });
+| Caso | Resultado esperado |
+|---|---|
+| Consultar catálogo y categorías sin token | `200`; productos iniciales y categorías disponibles. |
+| Intentar crear producto sin autenticación | `401`. |
+| Administrador ejecuta CRUD de producto | Crear `201`, consultar/actualizar `200`, eliminar `204`, luego consultar `404`. |
+| Registrar cliente e iniciar sesión | `201` en registro; `200` en login con JWT, expiración y rol `CLIENTE`. |
+| Cliente intenta modificar catálogo | `403`. |
+| Cliente DUOC registra una compra | `201`; subtotal, descuento del 20%, total y detalle calculados con el precio de servidor. |
+| Vendedor consulta boletas | `200` para listado y detalle; no puede actualizar productos (`403`). |
 
-  // --- PRUEBA 2: Validaciones en Formulario de Registro ---
-  test('2. RegistroView debe mostrar error cuando la contraseña tiene menos de 6 caracteres', () => {
-    render(
-      <BrowserRouter>
-        <RegistroView />
-      </BrowserRouter>
-    );
+## Verificaciones frontend
 
-    const inputNombre = screen.getByLabelText(/Nombre Completo/i);
-    const inputEmail = screen.getByLabelText(/Correo Electrónico/i);
-    const inputPass = screen.getByLabelText(/^Contraseña/i);
-    const btnSubmit = screen.getByRole('button', { name: /Registrarme/i });
+En la raíz del proyecto:
 
-    fireEvent.change(inputNombre, { target: { value: 'Usuario Test' } });
-    fireEvent.change(inputEmail, { target: { value: 'test@duoc.cl' } });
-    fireEvent.change(inputPass, { target: { value: '123' } });
+```powershell
+npm run build
+npx eslint src/api src/auth src/components/NavbarTienda.jsx src/components/AdminSidebar.jsx src/views/CheckoutView.jsx src/views/PagoExitosoView.jsx src/views/LoginView.jsx src/views/admin src/views/seller src/App.jsx
+```
 
-    fireEvent.click(btnSubmit);
+El repositorio no configura actualmente un runner para las pruebas React antiguas. `npm run lint` global puede reportar los globals `describe`, `test` y `expect` en `src/components/ProductCard.spec.jsx`; ese archivo no forma parte de los tests automatizados descritos aquí.
 
-    expect(screen.getByText('La contraseña debe tener al menos 6 caracteres')).toBeInTheDocument();
-  });
+## Pruebas manuales de aceptación
 
-  // --- PRUEBA 3: Protección de Ruta de Administración (Control de Acceso) ---
-  test('3. AdminLayout debe denegar el acceso si el usuario no es admin', () => {
-    sessionStorage.clear(); // Asegurar que no haya sesión de admin
+1. Abrir la tienda y verificar que el catálogo aparece desde Spring Boot.
+2. Registrar e iniciar sesión como cliente; verificar que el token se guarda en `sessionStorage`.
+3. Agregar productos al carrito y confirmar una compra. Revisar la respuesta `201` de `POST /api/v1/boletas` y la pantalla con el número de boleta.
+4. Probar una cuenta DUOC y otra no DUOC; comparar el descuento que calcula el backend.
+5. Iniciar sesión como administrador, completar CRUD de producto y revisar boletas.
+6. Iniciar sesión como vendedor; comprobar consulta de productos/boletas y rechazo de escrituras.
+7. Abrir `/swagger-ui/index.html` y verificar que se publica el contrato OpenAPI.
+8. Reiniciar Spring Boot y comprobar que las boletas continúan en H2.
 
-    render(
-      <BrowserRouter>
-        <AdminLayout />
-      </BrowserRouter>
-    );
-
-    expect(screen.getByText('Acceso Restringido')).toBeInTheDocument();
-    expect(screen.getByText(/Debes iniciar sesión con una cuenta de administrador/i)).toBeInTheDocument();
-  });
-
-  // --- PRUEBA 4: Inserción y Persistencia en localStorage ---
-  test('4. Debe inicializar correctamente la clave de productos en localStorage', () => {
-    localStorage.clear();
-    const productosSimulados = [{ id: 1, nombre: 'Test Item', precio: 5000 }];
-    
-    localStorage.setItem('productos', JSON.stringify(productosSimulados));
-    const recuperados = JSON.parse(localStorage.getItem('productos'));
-
-    expect(recuperados.length).toBe(1);
-    expect(recuperados[0].nombre).toBe('Test Item');
-  });
-
-});
+No compartas ni incluyas en evidencias contraseñas, tokens JWT, archivos de base H2 o claves SSH.

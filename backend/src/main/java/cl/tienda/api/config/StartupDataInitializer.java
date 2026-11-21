@@ -2,6 +2,8 @@ package cl.tienda.api.config;
 
 import cl.tienda.api.product.ProductEntity;
 import cl.tienda.api.product.ProductRepository;
+import cl.tienda.api.product.CategoryEntity;
+import cl.tienda.api.product.CategoryRepository;
 import cl.tienda.api.user.Role;
 import cl.tienda.api.user.UserEntity;
 import cl.tienda.api.user.UserRepository;
@@ -17,36 +19,47 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class StartupDataInitializer implements ApplicationRunner {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final String adminEmail;
     private final String adminPassword;
+    private final String sellerEmail;
+    private final String sellerPassword;
 
     public StartupDataInitializer(
             ProductRepository productRepository,
+            CategoryRepository categoryRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             @Value("${app.admin.email}") String adminEmail,
-            @Value("${app.admin.initial-password}") String adminPassword
+            @Value("${app.admin.initial-password}") String adminPassword,
+            @Value("${app.seller.email:}") String sellerEmail,
+            @Value("${app.seller.initial-password:}") String sellerPassword
     ) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.adminEmail = adminEmail;
         this.adminPassword = adminPassword;
+        this.sellerEmail = sellerEmail;
+        this.sellerPassword = sellerPassword;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
         seedProducts();
+        linkExistingProductCategories();
         seedAdmin();
+        seedSeller();
     }
 
     private void seedProducts() {
         if (productRepository.count() != 0) return;
 
-        productRepository.saveAll(List.of(
+        List<ProductEntity> products = List.of(
                 product("JM001", "Catan", 29990, "Juegos de Mesa",
                         "Un clásico juego de estrategia donde los jugadores compiten por colonizar y expandirse en la isla de Catan. Ideal para 3-4 jugadores.",
                         "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=800&q=80"),
@@ -77,7 +90,23 @@ public class StartupDataInitializer implements ApplicationRunner {
                 product("PP001", "Polera Gamer Personalizada 'Level-Up'", 14990, "Poleras Personalizadas",
                         "Una camiseta cómoda y estilizada, con la posibilidad de personalizarla con tu gamer tag o diseño favorito.",
                         "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80")
-        ));
+        );
+        products.forEach(product -> product.setCategory(findOrCreateCategory(product.getCategoria())));
+        productRepository.saveAll(products);
+    }
+
+    private void linkExistingProductCategories() {
+        for (ProductEntity product : productRepository.findAll()) {
+            if (product.getCategory() == null) {
+                product.setCategory(findOrCreateCategory(product.getCategoria()));
+                productRepository.save(product);
+            }
+        }
+    }
+
+    private CategoryEntity findOrCreateCategory(String name) {
+        return categoryRepository.findByNombreIgnoreCase(name)
+                .orElseGet(() -> categoryRepository.save(new CategoryEntity(name)));
     }
 
     private ProductEntity product(String id, String name, int price, String category, String description, String image) {
@@ -104,6 +133,34 @@ public class StartupDataInitializer implements ApplicationRunner {
                 passwordEncoder.encode(adminPassword),
                 null,
                 Role.ADMIN
+        ));
+    }
+
+    private void seedSeller() {
+        if (sellerEmail.isBlank()) {
+            if (!sellerPassword.isBlank()) {
+                throw new IllegalStateException("SELLER_EMAIL es obligatorio cuando se configura SELLER_INITIAL_PASSWORD.");
+            }
+            return;
+        }
+        String email = sellerEmail.trim().toLowerCase(java.util.Locale.ROOT);
+        UserEntity existing = userRepository.findByEmail(email).orElse(null);
+        if (existing != null) {
+            if (existing.getRole() != Role.VENDEDOR) {
+                throw new IllegalStateException("SELLER_EMAIL ya existe y no tiene rol de vendedor.");
+            }
+            return;
+        }
+        if (sellerPassword.length() < 12) {
+            throw new IllegalStateException("SELLER_INITIAL_PASSWORD debe tener al menos 12 caracteres.");
+        }
+
+        userRepository.save(new UserEntity(
+                email,
+                "Vendedor",
+                passwordEncoder.encode(sellerPassword),
+                null,
+                Role.VENDEDOR
         ));
     }
 }

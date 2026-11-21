@@ -66,10 +66,24 @@ JWT_EXPIRATION_SECONDS=900
 CORS_ALLOWED_ORIGINS=https://TU_DOMINIO
 ADMIN_EMAIL=admin@TU_DOMINIO
 ADMIN_INITIAL_PASSWORD=USA_UNA_CLAVE_ALEATORIA_DE_12_O_MAS_CARACTERES
+# Opcional: se crea un vendedor si el correo aún no existe.
+SELLER_EMAIL=vendedor@TU_DOMINIO
+SELLER_INITIAL_PASSWORD=USA_OTRA_CLAVE_ALEATORIA_DE_12_O_MAS_CARACTERES
 ```
 
 Al primer inicio se crea ese usuario como administrador si el correo aún no existe. Guarda la clave inicial en un gestor de contraseñas. No se restablece automáticamente al cambiar la variable en inicios posteriores.
+El usuario vendedor es opcional; al configurarlo, se crea con rol `VENDEDOR` si el correo no existe. El seed no cambia credenciales ni roles de cuentas ya existentes.
 Después de confirmar el primer inicio de sesión, puedes quitar `ADMIN_INITIAL_PASSWORD` del archivo de entorno y reiniciar el servicio; el usuario existente no se modifica.
+
+Antes de actualizar una base H2 existente, detén el servicio y conserva una copia del archivo:
+
+```bash
+sudo systemctl stop tienda-api
+sudo cp /var/lib/tienda-api/data/tienda.mv.db \
+  /var/lib/tienda-api/data/tienda.mv.db.backup-$(date +%F-%H%M%S)
+```
+
+La versión actual agrega tablas/relaciones de categoría y boletas. Hibernate actualiza el esquema al inicio; no borres la base anterior para desplegar esta versión.
 
 ```bash
 sudo systemctl daemon-reload
@@ -102,6 +116,7 @@ sudo systemctl reload nginx
 ```
 
 La plantilla está en `deploy/nginx/tienda.conf`. Cambia `server_name _;` por tu dominio si ya lo tienes. Configura TLS (por ejemplo, Certbot) antes de usar credenciales reales a través de Internet.
+Swagger queda accesible mediante `http://IP_PUBLICA_EC2/swagger-ui/index.html`; la API versionada se consulta en `http://IP_PUBLICA_EC2/api/v1/...`.
 
 Con el DNS del dominio apuntando a la IP pública de EC2, instala TLS:
 
@@ -125,6 +140,10 @@ npm run dev -- --mode tunel
 ```
 
 El frontend utiliza `.env.tunel.local` para enviar las llamadas a `http://localhost:8081/api`. Las peticiones del túnel solo exponen el puerto de API en tu equipo local.
+
+## Postman
+
+Importa `Tienda_Postman_Collection.json`. Para EC2 configura `baseUrl` como `http://IP_PUBLICA_EC2/api`; para el túnel usa `http://localhost:8081/api`. Completa `adminEmail` y `adminPassword` con la cuenta existente de EC2 y ejecuta **Autenticación → Login administrador** antes de las rutas protegidas. La contraseña no está en Git ni se puede recuperar del hash almacenado.
 
 ## Mantenimiento
 

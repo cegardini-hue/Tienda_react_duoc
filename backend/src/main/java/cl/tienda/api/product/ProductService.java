@@ -9,9 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -37,6 +39,7 @@ public class ProductService {
                 request.descripcion().trim(),
                 request.imagen().trim()
         );
+        product.setCategory(findOrCreateCategory(request.categoria()));
         return ProductResponse.from(productRepository.save(product));
     }
 
@@ -50,6 +53,7 @@ public class ProductService {
                 request.descripcion().trim(),
                 request.imagen().trim()
         );
+        product.setCategory(findOrCreateCategory(request.categoria()));
         return ProductResponse.from(productRepository.save(product));
     }
 
@@ -61,5 +65,11 @@ public class ProductService {
     private ProductEntity findEntity(String id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
+    }
+
+    private CategoryEntity findOrCreateCategory(String name) {
+        String normalizedName = name.trim();
+        return categoryRepository.findByNombreIgnoreCase(normalizedName)
+                .orElseGet(() -> categoryRepository.save(new CategoryEntity(normalizedName)));
     }
 }

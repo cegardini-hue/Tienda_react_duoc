@@ -77,9 +77,22 @@ public class SecurityConfig {
                                         "No tienes permisos para realizar esta acción.")))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/health").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/productos", "/api/productos/**").permitAll()
-                        .requestMatchers("/api/productos/**").hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/auth/login", "/api/auth/register",
+                                "/api/v1/auth/login", "/api/v1/auth/register",
+                                "/api/health", "/swagger-ui.html", "/swagger-ui/**",
+                                "/v3/api-docs", "/v3/api-docs/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/productos", "/api/productos/**",
+                                "/api/v1/productos", "/api/v1/productos/**",
+                                "/api/categorias", "/api/v1/categorias"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/boletas")
+                        .hasAnyRole("CLIENTE", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/boletas", "/api/v1/boletas/**")
+                        .hasAnyRole("ADMIN", "VENDEDOR")
+                        .requestMatchers("/api/productos/**", "/api/v1/productos/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

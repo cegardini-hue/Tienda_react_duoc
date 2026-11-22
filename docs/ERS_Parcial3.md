@@ -4,7 +4,7 @@
 **Estado:** actualizado para la Evaluación Parcial 3
 **Base de datos seleccionada:** H2 relacional en archivo local
 
-Este documento reemplaza el alcance desactualizado de `ERS_IEEE830_Tienda_React.docx`, que describía la persistencia anterior en el navegador.
+Este documento describe la implementación actual de la tienda para la Evaluación Parcial 3 y se entrega también en formato Word como `ERS_IEEE830_Tienda_React.docx`.
 
 ## 1. Propósito y alcance
 

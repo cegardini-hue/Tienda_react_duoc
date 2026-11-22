@@ -133,6 +133,7 @@ function AdminAgregarProductoView() {
               name="nombre"
               value={producto.nombre}
               onChange={manejarCambio}
+              placeholder="Ej: Teclado mecánico gamer"
               isInvalid={!!errores.nombre}
             />
             <Form.Control.Feedback type="invalid">{errores.nombre}</Form.Control.Feedback>
@@ -147,6 +148,7 @@ function AdminAgregarProductoView() {
               name="precio"
               value={producto.precio}
               onChange={manejarCambio}
+              placeholder="Ej: 49990"
               isInvalid={!!errores.precio}
             />
             <Form.Control.Feedback type="invalid">{errores.precio}</Form.Control.Feedback>
@@ -158,6 +160,7 @@ function AdminAgregarProductoView() {
               name="categoria"
               value={producto.categoria}
               onChange={manejarCambio}
+              placeholder="Ej: Accesorios"
               isInvalid={!!errores.categoria}
             />
             <Form.Control.Feedback type="invalid">{errores.categoria}</Form.Control.Feedback>
@@ -171,6 +174,7 @@ function AdminAgregarProductoView() {
               name="descripcion"
               value={producto.descripcion}
               onChange={manejarCambio}
+              placeholder="Describe las características principales del producto"
               isInvalid={!!errores.descripcion}
             />
             <Form.Control.Feedback type="invalid">{errores.descripcion}</Form.Control.Feedback>

@@ -28,7 +28,7 @@ function AdminLayout() {
           <AdminSidebar />
         </Col>
         <Col md={9} lg={10}>
-          <div className="bg-white p-4 rounded shadow-sm border">
+          <div className="bg-white text-dark p-4 rounded shadow-sm border">
             <Outlet />
           </div>
         </Col>
